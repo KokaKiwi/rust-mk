@@ -22,22 +22,22 @@
 
 ## VARS
 ### RUST
-RUSTC                           =   rustc
-RUSTDOC                         =   rustdoc
+RUSTC                           ?=  rustc
+RUSTDOC                         ?=  rustdoc
 
-RUST_BUILDDIR                   =   .rust_build
-RUST_LIBDIR                     =   lib
-RUST_DOCDIR                     =   doc
+RUST_BUILDDIR                   ?=  .rust_build
+RUST_LIBDIR                     ?=  lib
+RUST_DOCDIR                     ?=  doc
 
 RUSTCFLAGS                      +=  -L $(RUST_LIBDIR)
 RUSTDOCFLAGS                    +=  -L $(RUST_LIBDIR)
 
 ### COMMON
-INSTALL                         =   install
+INSTALL                         ?=  install
 
 PREFIX                          ?=  /usr/local
-BIN_DIR                         =   $(PREFIX)/bin
-LIB_DIR                         =   $(PREFIX)/lib
+BIN_DIR                         ?=  $(PREFIX)/bin
+LIB_DIR                         ?=  $(PREFIX)/lib
 
 ## UTILS
 # Recursive wildcard function
