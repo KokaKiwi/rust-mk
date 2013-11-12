@@ -21,14 +21,23 @@
 # SOFTWARE.
 
 ## VARS
+### RUST
 RUSTC							=	rustc
 RUSTDOC							=	rustdoc
 
 RUST_BUILDDIR					=	.rust_build
 RUST_LIBDIR						=	lib
+RUST_DOCDIR						=	doc
 
 RUSTCFLAGS						+=	-L $(RUST_LIBDIR)
-RUSTDOCFLAGS					+=
+RUSTDOCFLAGS					+=	-L $(RUST_LIBDIR)
+
+### COMMON
+INSTALL							=	install
+
+PREFIX							?=	/usr/local
+BIN_DIR							=	$(PREFIX)/bin
+LIB_DIR							=	$(PREFIX)/lib
 
 ## UTILS
 # Recursive wildcard function
@@ -44,36 +53,40 @@ define MODULE_RULES
 
 $(1)_PATH						:=	src/$(1)
 $(1)_SOURCES					:=	$$(call rwildcard,$$($(1)_PATH),*.rs)
-$(1)_DEPS_NAMES					:=	$$(foreach dep,$$($(1)_DEPS),$(RUST_BUILDDIR)/.build_$$(dep))
+$(1)_DEPS_NAMES					:=	$$(foreach dep,$$($(1)_DEPS),$$(RUST_BUILDDIR)/.build_$$(dep))
 
 ifneq ($$(wildcard $$($(1)_PATH)/main.rs),)
 $(1)_TYPE						:=	bin
+$(1)_NAME						:=	$(1)
 $(1)_MAIN_SOURCE				:=	$$($(1)_PATH)/main.rs
 else ifneq ($$(wildcard $$($(1)_PATH)/lib.rs),)
 $(1)_TYPE						:=	lib
+$(1)_NAME						:=	$$(patsubst lib%,%,$(1))
 $(1)_MAIN_SOURCE				:=	$$($(1)_PATH)/lib.rs
-$(1)_LIB						:=	$$(wildcard $(RUST_LIBDIR)/lib$(1)-*.so)
+$(1)_LIB						:=	$$(wildcard $$(RUST_LIBDIR)/lib$$($(1)_NAME)-*.so)
+$(1)_LIBFILENAME				:=	$$(notdir $$($(1)_LIB))
 else
 $$(error Unkown module type: $(1))
 endif
 
 ifneq ($$(wildcard $$($(1)_PATH)/test.rs),)
-$(1)_TESTNAME					:=	$(RUST_BUILDDIR)/test_$(1)
+$(1)_TESTNAME					:=	$$(RUST_BUILDDIR)/test_$(1)
 else
 $(1)_TESTNAME					:=
 endif
 
-$(1):							$(RUST_BUILDDIR)/.build_$(1)
+$(1):							$$(RUST_BUILDDIR)/.build_$(1)
 .PHONY:							$(1)
 
-$(RUST_BUILDDIR)/.build_$(1):	$$($(1)_DEPS_NAMES) $$($(1)_SOURCES)
+$$(RUST_BUILDDIR)/.build_$(1):	$$($(1)_DEPS_NAMES) $$($(1)_SOURCES)
 ifeq ($$($(1)_TYPE),bin)
 	$$(RUSTC) $$(RUSTCFLAGS) -o $(1) $$($(1)_MAIN_SOURCE)
 else ifeq ($$($(1)_TYPE),lib)
-	@mkdir -p $(RUST_LIBDIR)
-	$$(RUSTC) $$(RUSTCFLAGS) --lib --out-dir $(RUST_LIBDIR) $$($(1)_MAIN_SOURCE)
+	@mkdir -p $$(RUST_LIBDIR)
+	$$(RUSTC) $$(RUSTCFLAGS) --lib --out-dir $$(RUST_LIBDIR) $$($(1)_MAIN_SOURCE)
 endif
-	@touch $(RUST_BUILDDIR)/.build_$(1)
+	@mkdir -p $$(RUST_BUILDDIR)
+	@touch $$(RUST_BUILDDIR)/.build_$(1)
 
 clean_$(1):
 ifeq ($$($(1)_TYPE),bin)
@@ -81,18 +94,39 @@ ifeq ($$($(1)_TYPE),bin)
 else ifeq ($$($(1)_TYPE),lib)
 	@rm -f $$($(1)_LIB)
 endif
-	@rm -f $(RUST_BUILDDIR)/.build_$(1)
+	@rm -f $$(RUST_BUILDDIR)/.build_$(1)
 .PHONY:							clean_$(1)
 
 test_$(1):						$$($(1)_TESTNAME)
 ifneq ($$(wildcard $$($(1)_PATH)/test.rs),)
 	@$$($(1)_TESTNAME)
 endif
+.PHONY:							test_$(1)
 
 bench_$(1):						$$($(1)_TESTNAME)
 ifneq ($$(wildcard $$($(1)_PATH)/test.rs),)
 	@$$($(1)_TESTNAME) --bench
 endif
+.PHONY:							bench_$(1)
+
+ifeq ($$($(1)_TYPE),lib)
+doc_$(1):						$$($(1)_DEPS_NAMES)
+	@mkdir -p $$(RUST_DOCDIR)/$$($(1)_NAME)
+	$$(RUSTDOC) $$(RUSTDOCFLAGS) -o $$(RUST_DOCDIR)/$$($(1)_NAME) $$($(1)_MAIN_SOURCE)
+else
+doc_$(1):
+endif
+.PHONY:							doc_$(1)
+
+install_$(1):					$$(RUST_BUILDDIR)/.build_$(1)
+ifeq ($$($(1)_TYPE),bin)
+	@mkdir -p $$(BIN_DIR)
+	$$(INSTALL) -m 0755 $(1) $$(BIN_DIR)/$(1)
+else ifeq ($$($(1)_TYPE),lib)
+	@mkdir -p $$(LIB_DIR)
+	$$(INSTALL) -m 0755 $$($(1)_LIB) $$(LIB_DIR)/$$($(1)_LIBFILENAME)
+endif
+.PHONY:							install_$(1)
 
 ifneq ($$(wildcard $$($(1)_PATH)/test.rs),)
 $$($(1)_TESTNAME):				$$($(1)_SOURCES)
@@ -105,11 +139,15 @@ endef
 all:							$(RUST_BUILDDIR) $(RUST_MODULES)
 
 clean:							$(addprefix clean_,$(RUST_MODULES))
-	@rm -rf $(RUST_BUILDDIR) $(RUST_LIBDIR)
+	@rm -rf $(RUST_BUILDDIR) $(RUST_LIBDIR) $(RUST_DOCDIR)
 
 test:							$(addprefix test_,$(RUST_MODULES))
 
 bench:							$(addprefix bench_,$(RUST_MODULES))
+
+doc:							$(addprefix doc_,$(RUST_MODULES))
+
+install:						$(addprefix install_,$(RUST_MODULES))
 
 $(foreach mod,$(RUST_MODULES),$(eval $(call MODULE_RULES,$(mod))))
 
