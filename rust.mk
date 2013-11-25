@@ -161,7 +161,7 @@ install_$(1):
 endef
 
 ## RULES
-all:                            $(RUST_BUILDDIR) $(RUST_SUBMODULES) $(RUST_MODULES)
+all:                            $(RUST_BUILDDIR) $(RUST_DEPS) $(RUST_SUBMODULES) $(RUST_MODULES)
 
 clean:                          $(addprefix clean_,$(RUST_SUBMODULES)) $(addprefix clean_,$(RUST_MODULES))
 	@rm -rf $(RUST_BUILDDIR) $(RUST_LIBDIR) $(RUST_DOCDIR)
