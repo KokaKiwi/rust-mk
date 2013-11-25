@@ -135,6 +135,28 @@ endif
 
 endef
 
+define SUBMODULE_RULES
+$(1)_PATH                       :=  deps/$(1)
+
+$(1):
+	make -C $$($(1)_PATH) all
+
+clean_$(1):
+	make -C $$($(1)_PATH) clean
+
+test_$(1):
+	make -C $$($(1)_PATH) test
+
+bench_$(1):
+	make -C $$($(1)_PATH) bench
+
+doc_$(1):
+	make -C $$($(1)_PATH) doc
+
+install_$(1):
+	make -C $$($(1)_PATH) install
+endef
+
 ## RULES
 all:                            $(RUST_BUILDDIR) $(RUST_MODULES)
 
@@ -150,6 +172,7 @@ doc:                            $(addprefix doc_,$(RUST_MODULES))
 install:                        $(addprefix install_,$(RUST_MODULES))
 
 $(foreach mod,$(RUST_MODULES),$(eval $(call MODULE_RULES,$(mod))))
+$(foreach smod,$(RUST_SUBMODULES),$(eval $(call SUBMODULE_RULES,$(smod))))
 
 $(RUST_BUILDDIR):
 	@mkdir -p $(RUST_BUILDDIR)
