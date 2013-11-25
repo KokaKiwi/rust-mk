@@ -29,8 +29,9 @@ RUST_BUILDDIR                   ?=  .rust_build
 RUST_LIBDIR                     ?=  lib
 RUST_DOCDIR                     ?=  doc
 
-RUSTCFLAGS                      +=  -L $(RUST_LIBDIR)
-RUSTDOCFLAGS                    +=  -L $(RUST_LIBDIR)
+RUSTLINKFLAGS                   +=  -L $(RUST_LIBDIR)
+RUSTCFLAGS                      +=  $(RUSTLINKFLAGS)
+RUSTDOCFLAGS                    +=  $(RUSTLINKFLAGS)
 
 ### COMMON
 INSTALL                         ?=  install
@@ -138,38 +139,40 @@ endef
 define SUBMODULE_RULES
 $(1)_PATH                       :=  deps/$(1)
 
+RUSTLINKFLAGS                   +=  -L $$($(1)_PATH)/lib
+
 $(1):
-	make -C $$($(1)_PATH) all
+	@make -C $$($(1)_PATH) all
 
 clean_$(1):
-	make -C $$($(1)_PATH) clean
+	@make -C $$($(1)_PATH) clean
 
 test_$(1):
-	make -C $$($(1)_PATH) test
+	@make -C $$($(1)_PATH) test
 
 bench_$(1):
-	make -C $$($(1)_PATH) bench
+	@make -C $$($(1)_PATH) bench
 
 doc_$(1):
-	make -C $$($(1)_PATH) doc
+	@make -C $$($(1)_PATH) doc
 
 install_$(1):
-	make -C $$($(1)_PATH) install
+	@make -C $$($(1)_PATH) install
 endef
 
 ## RULES
-all:                            $(RUST_BUILDDIR) $(RUST_MODULES)
+all:                            $(RUST_BUILDDIR) $(RUST_MODULES) $(RUST_SUBMODULES)
 
-clean:                          $(addprefix clean_,$(RUST_MODULES))
+clean:                          $(addprefix clean_,$(RUST_MODULES)) $(addprefix clean_,$(RUST_SUBMODULES))
 	@rm -rf $(RUST_BUILDDIR) $(RUST_LIBDIR) $(RUST_DOCDIR)
 
-test:                           $(addprefix test_,$(RUST_MODULES))
+test:                           $(addprefix test_,$(RUST_MODULES)) $(addprefix test_,$(RUST_SUBMODULES))
 
-bench:                          $(addprefix bench_,$(RUST_MODULES))
+bench:                          $(addprefix bench_,$(RUST_MODULES)) $(addprefix bench_,$(RUST_SUBMODULES))
 
-doc:                            $(addprefix doc_,$(RUST_MODULES))
+doc:                            $(addprefix doc_,$(RUST_MODULES)) $(addprefix doc_,$(RUST_SUBMODULES))
 
-install:                        $(addprefix install_,$(RUST_MODULES))
+install:                        $(addprefix install_,$(RUST_MODULES)) $(addprefix install_,$(RUST_SUBMODULES))
 
 $(foreach mod,$(RUST_MODULES),$(eval $(call MODULE_RULES,$(mod))))
 $(foreach smod,$(RUST_SUBMODULES),$(eval $(call SUBMODULE_RULES,$(smod))))
