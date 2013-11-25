@@ -161,18 +161,18 @@ install_$(1):
 endef
 
 ## RULES
-all:                            $(RUST_BUILDDIR) $(RUST_MODULES) $(RUST_SUBMODULES)
+all:                            $(RUST_BUILDDIR) $(RUST_SUBMODULES) $(RUST_MODULES)
 
-clean:                          $(addprefix clean_,$(RUST_MODULES)) $(addprefix clean_,$(RUST_SUBMODULES))
+clean:                          $(addprefix clean_,$(RUST_SUBMODULES)) $(addprefix clean_,$(RUST_MODULES))
 	@rm -rf $(RUST_BUILDDIR) $(RUST_LIBDIR) $(RUST_DOCDIR)
 
-test:                           $(addprefix test_,$(RUST_MODULES)) $(addprefix test_,$(RUST_SUBMODULES))
+test:                           $(addprefix test_,$(RUST_SUBMODULES)) $(addprefix test_,$(RUST_MODULES))
 
-bench:                          $(addprefix bench_,$(RUST_MODULES)) $(addprefix bench_,$(RUST_SUBMODULES))
+bench:                          $(addprefix bench_,$(RUST_SUBMODULES)) $(addprefix bench_,$(RUST_MODULES))
 
-doc:                            $(addprefix doc_,$(RUST_MODULES)) $(addprefix doc_,$(RUST_SUBMODULES))
+doc:                            $(addprefix doc_,$(RUST_SUBMODULES)) $(addprefix doc_,$(RUST_MODULES))
 
-install:                        $(addprefix install_,$(RUST_MODULES)) $(addprefix install_,$(RUST_SUBMODULES))
+install:                        $(addprefix install_,$(RUST_SUBMODULES)) $(addprefix install_,$(RUST_MODULES))
 
 $(foreach mod,$(RUST_MODULES),$(eval $(call MODULE_RULES,$(mod))))
 $(foreach smod,$(RUST_SUBMODULES),$(eval $(call SUBMODULE_RULES,$(smod))))
