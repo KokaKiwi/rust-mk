@@ -70,11 +70,7 @@ else
 $$(error Unkown module type: $(1))
 endif
 
-ifneq ($$(wildcard $$($(1)_PATH)/test.rs),)
 $(1)_TESTNAME                   :=  $$(RUST_BUILDDIR)/test_$(1)
-else
-$(1)_TESTNAME                   :=
-endif
 
 $(1):                           $$(RUST_BUILDDIR)/.build_$(1)
 .PHONY:                         $(1)
@@ -99,9 +95,7 @@ endif
 .PHONY:                         clean_$(1)
 
 test_$(1):                      $$($(1)_TESTNAME)
-ifneq ($$(wildcard $$($(1)_PATH)/test.rs),)
 	@$$($(1)_TESTNAME)
-endif
 .PHONY:                         test_$(1)
 
 bench_$(1):                     $$($(1)_TESTNAME)
@@ -129,9 +123,11 @@ else ifeq ($$($(1)_TYPE),lib)
 endif
 .PHONY:                         install_$(1)
 
-ifneq ($$(wildcard $$($(1)_PATH)/test.rs),)
 $$($(1)_TESTNAME):              $$($(1)_SOURCES)
+ifneq ($$(wildcard $$($(1)_PATH)/test.rs),)
 	$$(RUSTC) $$(RUSTCFLAGS) --test -o $$($(1)_TESTNAME) $$($(1)_PATH)/test.rs
+else
+	$$(RUSTC) $$(RUSTCFLAGS) --test -o $$($(1)_TESTNAME) $$($(1)_MAIN_SOURCE)
 endif
 
 endef
