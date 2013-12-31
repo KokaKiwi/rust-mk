@@ -99,9 +99,7 @@ test_$(1):                      $$($(1)_TESTNAME)
 .PHONY:                         test_$(1)
 
 bench_$(1):                     $$($(1)_TESTNAME)
-ifneq ($$(wildcard $$($(1)_PATH)/test.rs),)
 	@$$($(1)_TESTNAME) --bench
-endif
 .PHONY:                         bench_$(1)
 
 ifeq ($$($(1)_TYPE),lib)
