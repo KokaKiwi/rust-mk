@@ -88,3 +88,8 @@ This directory is where crates must be find.
 Default: `lib`
 
 This directory is where library crates will be stored.
+
+License
+-------
+
+`rust-mk` is licensed under MIT license.
