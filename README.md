@@ -35,6 +35,21 @@ mycrate_RUSTCFLAGS  +=  -g          # Add some custom flags as you want.
 include             rust-mk/rust.mk
 ```
 
+Rules
+-----
+
+`make all` - Make all crates.
+
+`make clean` - Clean all targets.
+
+`make fclean` - Clean all targets and delete build directories.
+
+`make test` - Compile and run tests.
+
+`make bench` - Compile and run bench.
+
+`make doc` - Generate doc for crates.
+
 Special variables
 -----------------
 
