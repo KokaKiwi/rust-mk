@@ -14,6 +14,8 @@ git submodule add git://github.com/KokaKiwi/rust-mk.git
 
 ### Basic usage ###
 
+This Makefile will compile a crate located in src/mycrate/{lib.rs,main.rs}
+
 ```make
 RUSTCRATES          =   mycrate
 
