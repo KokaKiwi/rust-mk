@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 #
-# Copyright (c) 2013 KokaKiwi <kokakiwi@kokakiwi.net>
+# Copyright (c) 2014 Koka El Kiwi <kokakiwi@kokakiwi.net>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -9,36 +9,38 @@
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 #
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 
-## VARS
-### RUST
-RUSTC                           ?=  rustc
-RUSTDOC                         ?=  rustdoc
+# Paths
+RUSTC					?=	rustc
+RUSTDOC					?=	rustdoc
 
-RUST_BUILDDIR                   ?=  .rust_build
-RUST_LIBDIR                     ?=  lib
-RUST_DOCDIR                     ?=  doc
+# Flags
+RUSTCFLAGS				?=
+RUSTDOCFLAGS			?=
 
-RUSTLINKFLAGS                   +=  -L $(RUST_LIBDIR)
-RUSTCFLAGS                      +=  $(RUSTLINKFLAGS)
-RUSTDOCFLAGS                    +=  $(RUSTLINKFLAGS)
+# Variables
+RUSTDEBUG				?=	0
+RUSTBUILDDIR			?=	.rust
+RUSTSRCDIR				?=	src
+RUSTLIBDIR				?=	lib
 
-### COMMON
-INSTALL                         ?=  install
+RUSTCFLAGS				+=	-L $(RUSTLIBDIR)
 
-PREFIX                          ?=  /usr/local
-BIN_DIR                         ?=  $(PREFIX)/bin
-LIB_DIR                         ?=  $(PREFIX)/lib
+ifeq ($(RUSTDEBUG),0)
+RUSTCFLAGS				+=	--opt-level=3
+else
+RUSTCFLAGS				+=	-g
+endif
 
 ## UTILS
 # Recursive wildcard function
@@ -46,132 +48,110 @@ LIB_DIR                         ?=  $(PREFIX)/lib
 rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) \
   $(filter $(subst *,%,$2),$d))
 
-# Not used, but keep it here, in case of...
-# map = $(foreach a,$(2),$(call $(1),$(a)))
+# Gen rules
+## Binary
+define RUST_CRATE_BIN
 
-## MODULE RULES
-define MODULE_RULES
+$(1)_ROOT				=	$$($(1)_DIRNAME)/main.rs
 
-$(1)_PATH                       :=  src/$(1)
-$(1)_SOURCES                    :=  $$(call rwildcard,$$($(1)_PATH),*.rs)
-$(1)_DEPS_NAMES                 :=  $$(foreach dep,$$($(1)_DEPS),$$(RUST_BUILDDIR)/.build_$$(dep))
+endef
 
-ifneq ($$(wildcard $$($(1)_PATH)/main.rs),)
-$(1)_TYPE                       :=  bin
-$(1)_NAME                       :=  $(1)
-$(1)_MAIN_SOURCE                :=  $$($(1)_PATH)/main.rs
-else ifneq ($$(wildcard $$($(1)_PATH)/lib.rs),)
-$(1)_TYPE                       :=  lib
-$(1)_NAME                       :=  $$(patsubst lib%,%,$(1))
-$(1)_MAIN_SOURCE                :=  $$($(1)_PATH)/lib.rs
-$(1)_LIB                        :=  $$(wildcard $$(RUST_LIBDIR)/lib$$($(1)_NAME)-*.so)
-$(1)_LIBFILENAME                :=  $$(notdir $$($(1)_LIB))
-else
-$$(error Unkown module type: $(1))
+## Libray
+define RUST_CRATE_LIB
+
+$(1)_ROOT				=	$$($(1)_DIRNAME)/lib.rs
+$(1)_PREFIX				=	$$(RUSTLIBDIR)/
+$(1)_RUSTCFLAGS_BUILD	+=	--out-dir $$(RUSTLIBDIR)
+
+endef
+
+## Common
+define RUST_CRATE_COMMON
+
+$(1)_DIRNAME			=	$$(RUSTSRCDIR)/$(1)
+$(1)_DEPFILE			=	$$(RUSTBUILDDIR)/$(1).deps.mk
+$(1)_TESTNAME			=	$$(RUSTBUILDDIR)/test_$(1)
+
+ifeq ($$($(1)_TYPE),)
+ifneq ($$(wildcard $$($(1)_DIRNAME)/main.rs),)
+$(1)_TYPE				=	bin
+else ifneq ($$(wildcard $$($(1)_DIRNAME)/lib.rs),)
+$(1)_TYPE				=	lib
+endif
 endif
 
-$(1)_TESTNAME                   :=  $$(RUST_BUILDDIR)/test_$(1)
-
-$(1):                           $$(RUST_BUILDDIR)/.build_$(1)
-.PHONY:                         $(1)
-
-$$(RUST_BUILDDIR)/.build_$(1):  $$($(1)_DEPS_NAMES) $$($(1)_SOURCES)
 ifeq ($$($(1)_TYPE),bin)
-	$$(RUSTC) $$(RUSTCFLAGS) -o $(1) $$($(1)_MAIN_SOURCE)
+$$(eval $$(call RUST_CRATE_BIN,$(1)))
 else ifeq ($$($(1)_TYPE),lib)
-	@mkdir -p $$(RUST_LIBDIR)
-	$$(RUSTC) $$(RUSTCFLAGS) --lib --out-dir $$(RUST_LIBDIR) $$($(1)_MAIN_SOURCE)
+$$(eval $$(call RUST_CRATE_LIB,$(1)))
+else ifeq ($$($(1)_TYPE),)
+$$(error No crate type for '$(1)')
+else
+$$(error Unknown crate type '$$($(1)_TYPE)' for '$(1)')
 endif
-	@mkdir -p $$(RUST_BUILDDIR)
-	@touch $$(RUST_BUILDDIR)/.build_$(1)
+
+$(1)_NAMES				=	$$(addprefix $$($(1)_PREFIX),$$(shell $$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --crate-file-name $$($(1)_ROOT)))
+$(1)_NAME				=	$$(firstword $$($(1)_NAMES))
+
+build_$(1):				$$($(1)_NAME)
 
 clean_$(1):
-ifeq ($$($(1)_TYPE),bin)
-	@rm -f $(1)
-else ifeq ($$($(1)_TYPE),lib)
-	@rm -f $$($(1)_LIB)
-endif
-	@rm -f $$(RUST_BUILDDIR)/.build_$(1)
-.PHONY:                         clean_$(1)
+	rm -f $$($(1)_NAMES) $$($(1)_DEPFILE) $$($(1)_TESTNAME)
 
-test_$(1):                      $$($(1)_TESTNAME)
+test_$(1):				$$($(1)_TESTNAME)
 	@$$($(1)_TESTNAME)
-.PHONY:                         test_$(1)
 
-bench_$(1):                     $$($(1)_TESTNAME)
+bench_$(1):				$$($(1)_TESTNAME)
 	@$$($(1)_TESTNAME) --bench
-.PHONY:                         bench_$(1)
 
-ifeq ($$($(1)_TYPE),lib)
-doc_$(1):                       $$($(1)_DEPS_NAMES)
-	@mkdir -p $$(RUST_DOCDIR)/$$($(1)_NAME)
-	$$(RUSTDOC) $$(RUSTDOCFLAGS) -o $$(RUST_DOCDIR)/$$($(1)_NAME) $$($(1)_MAIN_SOURCE)
-else
 doc_$(1):
-endif
-.PHONY:                         doc_$(1)
+	$$(RUSTDOC) $$(RUSTDOCFLAGS) $$($(1)_ROOT)
 
-install_$(1):                   $$(RUST_BUILDDIR)/.build_$(1)
-ifeq ($$($(1)_TYPE),bin)
-	@mkdir -p $$(BIN_DIR)
-	$$(INSTALL) -m 0755 $(1) $$(BIN_DIR)/$(1)
-else ifeq ($$($(1)_TYPE),lib)
-	@mkdir -p $$(LIB_DIR)
-	$$(INSTALL) -m 0755 $$($(1)_LIB) $$(LIB_DIR)/$$($(1)_LIBFILENAME)
-endif
-.PHONY:                         install_$(1)
+$$($(1)_NAME):			$$($(1)_BUILD_DEPS)
+	$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS_BUILD) $$($(1)_RUSTCFLAGS) --dep-info $$($(1)_DEPFILE) $$($(1)_ROOT)
+-include $$($(1)_DEPFILE)
 
-$$($(1)_TESTNAME):              $$($(1)_SOURCES)
-ifneq ($$(wildcard $$($(1)_PATH)/test.rs),)
-	$$(RUSTC) $$(RUSTCFLAGS) --test -o $$($(1)_TESTNAME) $$($(1)_PATH)/test.rs
-else
-	$$(RUSTC) $$(RUSTCFLAGS) --test -o $$($(1)_TESTNAME) $$($(1)_MAIN_SOURCE)
-endif
+$$($(1)_TESTNAME):		$$($(1)_BUILD_DEPS)
+	@$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --test -o $$($(1)_TESTNAME) $$($(1)_ROOT)
+
+.PHONY all:				build_$(1)
+.PHONY clean:			clean_$(1)
+.PHONY test:			test_$(1)
+.PHONY bench:			bench_$(1)
+.PHONY doc:				doc_$(1)
+# .PHONY install:			install_$(1)
 
 endef
 
-define SUBMODULE_RULES
-$(1)_PATH                       :=  deps/$(1)
+## Utils
+define RUST_CRATE_DEPEND
+$(1):					$$($(2)_NAME)
+endef
 
-RUSTLINKFLAGS                   +=  -L $$($(1)_PATH)/lib
-
+define CREATE_DIR
 $(1):
-	@make -C $$($(1)_PATH) all
+	@mkdir -p $(1)
 
-clean_$(1):
-	@make -C $$($(1)_PATH) clean
-
-test_$(1):
-	@make -C $$($(1)_PATH) test
-
-bench_$(1):
-	@make -C $$($(1)_PATH) bench
-
-doc_$(1):
-	@make -C $$($(1)_PATH) doc
-
-install_$(1):
-	@make -C $$($(1)_PATH) install
+all test bench:			$(1)
 endef
 
-## RULES
-all:                            $(RUST_BUILDDIR) $(RUST_DEPS) $(RUST_SUBMODULES) $(RUST_MODULES)
+# Rules
+all:
+clean:
+fclean:
+test:
+bench:
+doc:
+# install:
 
-clean:                          $(addprefix clean_,$(RUST_SUBMODULES)) $(addprefix clean_,$(RUST_MODULES))
-	@rm -rf $(RUST_BUILDDIR) $(RUST_LIBDIR) $(RUST_DOCDIR)
+fclean:					clean
 
-test:                           $(addprefix test_,$(RUST_SUBMODULES)) $(addprefix test_,$(RUST_MODULES))
+$(eval $(call CREATE_DIR,$(RUSTBUILDDIR)))
+$(eval $(call CREATE_DIR,$(RUSTLIBDIR)))
 
-bench:                          $(addprefix bench_,$(RUST_SUBMODULES)) $(addprefix bench_,$(RUST_MODULES))
+$(foreach crate,$(RUSTCRATES),$(eval $(call RUST_CRATE_COMMON,$(crate))))
+$(foreach crate,$(RUSTCRATES),$(eval $(call RUST_CRATE_DEPEND,$(crate),$($(crate)_CRATE_DEPS))))
 
-doc:                            $(addprefix doc_,$(RUST_SUBMODULES)) $(addprefix doc_,$(RUST_MODULES))
-
-install:                        $(addprefix install_,$(RUST_SUBMODULES)) $(addprefix install_,$(RUST_MODULES))
-
-$(foreach mod,$(RUST_MODULES),$(eval $(call MODULE_RULES,$(mod))))
-$(foreach smod,$(RUST_SUBMODULES),$(eval $(call SUBMODULE_RULES,$(smod))))
-
-$(RUST_BUILDDIR):
-	@mkdir -p $(RUST_BUILDDIR)
-
-.PHONY:                         all clean test bench
+fclean_dirs:
+	rm -rf $(RUSTLIBDIR) $(RUSTBUILDDIR) doc
+.PHONY fclean:			fclean_dirs
