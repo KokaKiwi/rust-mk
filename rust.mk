@@ -97,6 +97,7 @@ else
 $$(error Unknown crate type '$$($(1)_TYPE)' for '$(1)')
 endif
 
+$(1)_ROOT_TEST			=	$$($(1)_ROOT)
 $(1)_NAMES				=	$$(addprefix $$($(1)_PREFIX),$$(shell $$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --crate-file-name $$($(1)_ROOT)))
 $(1)_NAME				=	$$(firstword $$($(1)_NAMES))
 
@@ -123,7 +124,7 @@ $$($(1)_NAME):			$$($(1)_BUILD_DEPS)
 -include $$($(1)_DEPFILE)
 
 $$($(1)_TESTNAME):		$$($(1)_BUILD_DEPS)
-	@$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --test -o $$($(1)_TESTNAME) $$($(1)_ROOT)
+	@$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --test -o $$($(1)_TESTNAME) $$($(1)_ROOT_TEST)
 
 .PHONY all:				build_$(1)
 .PHONY clean:			clean_$(1)
