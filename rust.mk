@@ -144,7 +144,7 @@ define CREATE_DIR
 $(1):
 	@mkdir -p $(1)
 
-all test bench:         $(1)
+all test bench install: $(1)
 endef
 
 # Rules
