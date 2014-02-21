@@ -27,10 +27,10 @@ include             rust-mk/rust.mk
 ```make
 RUSTCRATES          =   mycrate mydep
 
-mycrate_TYPE        =   bin         # Automatically detected if not specified.
+mycrate_TYPE        =    bin        # Automatically detected if not specified.
 mycrate_CRATE_DEPS  +=   mydep      # mydep will be build before mycrate.
 mycrate_BUILD_DEPS  +=   libtest.a  # Raw dependency of libtest.a for mycrate.
-mycrate_RUSTCFLAGS  +=  -g          # Add some custom flags as you want.
+mycrate_RUSTCFLAGS  +=   -g         # Add some custom flags as you want.
 
 include             rust-mk/rust.mk
 ```
