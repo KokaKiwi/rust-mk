@@ -31,6 +31,7 @@ RUSTDOCFLAGS            ?=
 
 # Variables
 RUSTDEBUG               ?=  0
+RUSTAUTORULES           ?=  1
 RUSTBUILDDIR            ?=  .rust
 RUSTSRCDIR              ?=  src
 RUSTLIBDIR              ?=  lib
@@ -147,7 +148,16 @@ $(1):
 all test bench install: $(1)
 endef
 
+## Rules
+define RUST_CRATE_RULES
+
+$$(foreach crate,$$(RUSTCRATES),$$(eval $$(call RUST_CRATE_COMMON,$$(crate))))
+$$(foreach crate,$$(RUSTCRATES),$$(eval $$(call RUST_CRATE_DEPEND,$$(crate),$$($$(crate)_CRATE_DEPS))))
+
+endef
+
 # Rules
+
 all:
 clean:
 fclean:
@@ -156,13 +166,14 @@ bench:
 doc:
 install:
 
-fclean:                 clean
-
 $(eval $(call CREATE_DIR,$(RUSTBUILDDIR)))
 $(eval $(call CREATE_DIR,$(RUSTLIBDIR)))
 
-$(foreach crate,$(RUSTCRATES),$(eval $(call RUST_CRATE_COMMON,$(crate))))
-$(foreach crate,$(RUSTCRATES),$(eval $(call RUST_CRATE_DEPEND,$(crate),$($(crate)_CRATE_DEPS))))
+ifeq ($(RUSTAUTORULES),1)
+$(eval $(call RUST_CRATE_RULES))
+endif
+
+fclean:                 clean
 
 fclean_dirs:
 	rm -rf $(RUSTLIBDIR) $(RUSTBUILDDIR) doc

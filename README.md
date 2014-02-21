@@ -35,6 +35,16 @@ mycrate_RUSTCFLAGS  +=   -g         # Add some custom flags as you want.
 include             rust-mk/rust.mk
 ```
 
+### Disable auto crate rules ###
+
+```make
+RUSTAUTORULES       =   0
+
+include             rust-mk/rust.mk
+
+$(eval $(call RUST_CRATE_RULES))
+```
+
 Rules
 -----
 
