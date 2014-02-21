@@ -23,6 +23,7 @@
 # Paths
 RUSTC					?=	rustc
 RUSTDOC					?=	rustdoc
+INSTALL					?=	install
 
 # Flags
 RUSTCFLAGS				?=
@@ -33,6 +34,7 @@ RUSTDEBUG				?=	0
 RUSTBUILDDIR			?=	.rust
 RUSTSRCDIR				?=	src
 RUSTLIBDIR				?=	lib
+RUSTINSTALLDIR			?=	~/.rust
 
 RUSTCFLAGS				+=	-L $(RUSTLIBDIR)
 
@@ -53,6 +55,7 @@ rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) \
 define RUST_CRATE_BIN
 
 $(1)_ROOT				=	$$($(1)_DIRNAME)/main.rs
+$(1)_INSTALLDIR			=	$$(RUSTINSTALLDIR)/bin
 
 endef
 
@@ -62,6 +65,7 @@ define RUST_CRATE_LIB
 $(1)_ROOT				=	$$($(1)_DIRNAME)/lib.rs
 $(1)_PREFIX				=	$$(RUSTLIBDIR)/
 $(1)_RUSTCFLAGS_BUILD	+=	--out-dir $$(RUSTLIBDIR)
+$(1)_INSTALLDIR			=	$$(RUSTINSTALLDIR)/lib
 
 endef
 
@@ -107,6 +111,10 @@ bench_$(1):				$$($(1)_TESTNAME)
 doc_$(1):
 	$$(RUSTDOC) $$(RUSTDOCFLAGS) $$($(1)_ROOT)
 
+install_$(1):			$$($(1)_NAME)
+	@mkdir -p $$($(1)_INSTALLDIR)
+	$(INSTALL) $$($(1)_NAMES) $$($(1)_INSTALLDIR)
+
 $$($(1)_NAME):			$$($(1)_BUILD_DEPS)
 	$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS_BUILD) $$($(1)_RUSTCFLAGS) --dep-info $$($(1)_DEPFILE) $$($(1)_ROOT)
 -include $$($(1)_DEPFILE)
@@ -119,7 +127,7 @@ $$($(1)_TESTNAME):		$$($(1)_BUILD_DEPS)
 .PHONY test:			test_$(1)
 .PHONY bench:			bench_$(1)
 .PHONY doc:				doc_$(1)
-# .PHONY install:			install_$(1)
+.PHONY install:			install_$(1)
 
 endef
 
@@ -142,7 +150,7 @@ fclean:
 test:
 bench:
 doc:
-# install:
+install:
 
 fclean:					clean
 

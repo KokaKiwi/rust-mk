@@ -50,6 +50,8 @@ Rules
 
 `make doc` - Generate doc for crates.
 
+`make install` - Install crates.
+
 Special variables
 -----------------
 
@@ -106,6 +108,12 @@ This directory is where crates must be find.
 Default: `lib`
 
 This directory is where library crates will be stored.
+
+### RUSTINSTALLDIR ###
+
+Default: `~/.rust`
+
+This directory is where all crates will be installed.
 
 License
 -------
