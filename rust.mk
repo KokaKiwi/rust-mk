@@ -21,30 +21,30 @@
 # THE SOFTWARE.
 
 # Paths
-RUSTC					?=	rustc
-RUSTDOC					?=	rustdoc
-INSTALL					?=	install
+RUSTC                   ?=  rustc
+RUSTDOC                 ?=  rustdoc
+INSTALL                 ?=  install
 
 # Flags
-RUSTCFLAGS				?=
-RUSTDOCFLAGS			?=
+RUSTCFLAGS              ?=
+RUSTDOCFLAGS            ?=
 
 # Variables
-RUSTDEBUG				?=	0
-RUSTBUILDDIR			?=	.rust
-RUSTSRCDIR				?=	src
-RUSTLIBDIR				?=	lib
-RUSTINSTALLDIR			?=	~/.rust
+RUSTDEBUG               ?=  0
+RUSTBUILDDIR            ?=  .rust
+RUSTSRCDIR              ?=  src
+RUSTLIBDIR              ?=  lib
+RUSTINSTALLDIR          ?=  ~/.rust
 
-RUSTLIBFLAGS			=	-L $(RUSTLIBDIR)
+RUSTLIBFLAGS            =   -L $(RUSTLIBDIR)
 
-RUSTCFLAGS				+=	$(RUSTLIBFLAGS)
-RUSTDOCFLAGS			+=	$(RUSTLIBFLAGS)
+RUSTCFLAGS              +=  $(RUSTLIBFLAGS)
+RUSTDOCFLAGS            +=  $(RUSTLIBFLAGS)
 
 ifeq ($(RUSTDEBUG),0)
-RUSTCFLAGS				+=	--opt-level=3
+RUSTCFLAGS              +=  --opt-level=3
 else
-RUSTCFLAGS				+=	-g
+RUSTCFLAGS              +=  -g
 endif
 
 ## UTILS
@@ -57,33 +57,33 @@ rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) \
 ## Binary
 define RUST_CRATE_BIN
 
-$(1)_ROOT				=	$$($(1)_DIRNAME)/main.rs
-$(1)_INSTALLDIR			=	$$(RUSTINSTALLDIR)/bin
+$(1)_ROOT               =   $$($(1)_DIRNAME)/main.rs
+$(1)_INSTALLDIR         =   $$(RUSTINSTALLDIR)/bin
 
 endef
 
 ## Libray
 define RUST_CRATE_LIB
 
-$(1)_ROOT				=	$$($(1)_DIRNAME)/lib.rs
-$(1)_PREFIX				=	$$(RUSTLIBDIR)/
-$(1)_RUSTCFLAGS_BUILD	+=	--out-dir $$(RUSTLIBDIR)
-$(1)_INSTALLDIR			=	$$(RUSTINSTALLDIR)/lib
+$(1)_ROOT               =   $$($(1)_DIRNAME)/lib.rs
+$(1)_PREFIX             =   $$(RUSTLIBDIR)/
+$(1)_RUSTCFLAGS_BUILD   +=  --out-dir $$(RUSTLIBDIR)
+$(1)_INSTALLDIR         =   $$(RUSTINSTALLDIR)/lib
 
 endef
 
 ## Common
 define RUST_CRATE_COMMON
 
-$(1)_DIRNAME			=	$$(RUSTSRCDIR)/$(1)
-$(1)_DEPFILE			=	$$(RUSTBUILDDIR)/$(1).deps.mk
-$(1)_TESTNAME			=	$$(RUSTBUILDDIR)/test_$(1)
+$(1)_DIRNAME            =   $$(RUSTSRCDIR)/$(1)
+$(1)_DEPFILE            =   $$(RUSTBUILDDIR)/$(1).deps.mk
+$(1)_TESTNAME           =   $$(RUSTBUILDDIR)/test_$(1)
 
 ifeq ($$($(1)_TYPE),)
 ifneq ($$(wildcard $$($(1)_DIRNAME)/main.rs),)
-$(1)_TYPE				=	bin
+$(1)_TYPE               =   bin
 else ifneq ($$(wildcard $$($(1)_DIRNAME)/lib.rs),)
-$(1)_TYPE				=	lib
+$(1)_TYPE               =   lib
 endif
 endif
 
@@ -97,54 +97,54 @@ else
 $$(error Unknown crate type '$$($(1)_TYPE)' for '$(1)')
 endif
 
-$(1)_ROOT_TEST			=	$$($(1)_ROOT)
-$(1)_NAMES				=	$$(addprefix $$($(1)_PREFIX),$$(shell $$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --crate-file-name $$($(1)_ROOT)))
-$(1)_NAME				=	$$(firstword $$($(1)_NAMES))
+$(1)_ROOT_TEST          =   $$($(1)_ROOT)
+$(1)_NAMES              =   $$(addprefix $$($(1)_PREFIX),$$(shell $$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --crate-file-name $$($(1)_ROOT)))
+$(1)_NAME               =   $$(firstword $$($(1)_NAMES))
 
-build_$(1):				$$($(1)_NAME)
+build_$(1):             $$($(1)_NAME)
 
 clean_$(1):
 	rm -f $$($(1)_NAMES) $$($(1)_DEPFILE) $$($(1)_TESTNAME)
 
-test_$(1):				$$($(1)_TESTNAME)
+test_$(1):              $$($(1)_TESTNAME)
 	@$$($(1)_TESTNAME)
 
-bench_$(1):				$$($(1)_TESTNAME)
+bench_$(1):             $$($(1)_TESTNAME)
 	@$$($(1)_TESTNAME) --bench
 
 doc_$(1):
 	$$(RUSTDOC) $$(RUSTDOCFLAGS) $$($(1)_ROOT)
 
-install_$(1):			$$($(1)_NAME)
+install_$(1):           $$($(1)_NAME)
 	@mkdir -p $$($(1)_INSTALLDIR)
 	$(INSTALL) $$($(1)_NAMES) $$($(1)_INSTALLDIR)
 
-$$($(1)_NAME):			$$($(1)_BUILD_DEPS)
+$$($(1)_NAME):          $$($(1)_BUILD_DEPS)
 	$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS_BUILD) $$($(1)_RUSTCFLAGS) --dep-info $$($(1)_DEPFILE) $$($(1)_ROOT)
 -include $$($(1)_DEPFILE)
 
-$$($(1)_TESTNAME):		$$($(1)_BUILD_DEPS)
+$$($(1)_TESTNAME):      $$($(1)_BUILD_DEPS)
 	@$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --test -o $$($(1)_TESTNAME) $$($(1)_ROOT_TEST)
 
-.PHONY all:				build_$(1)
-.PHONY clean:			clean_$(1)
-.PHONY test:			test_$(1)
-.PHONY bench:			bench_$(1)
-.PHONY doc:				doc_$(1)
-.PHONY install:			install_$(1)
+.PHONY all:             build_$(1)
+.PHONY clean:           clean_$(1)
+.PHONY test:            test_$(1)
+.PHONY bench:           bench_$(1)
+.PHONY doc:             doc_$(1)
+.PHONY install:         install_$(1)
 
 endef
 
 ## Utils
 define RUST_CRATE_DEPEND
-$(1):					$$($(2)_NAME)
+$(1):                   $$($(2)_NAME)
 endef
 
 define CREATE_DIR
 $(1):
 	@mkdir -p $(1)
 
-all test bench:			$(1)
+all test bench:         $(1)
 endef
 
 # Rules
@@ -156,7 +156,7 @@ bench:
 doc:
 install:
 
-fclean:					clean
+fclean:                 clean
 
 $(eval $(call CREATE_DIR,$(RUSTBUILDDIR)))
 $(eval $(call CREATE_DIR,$(RUSTLIBDIR)))
@@ -166,4 +166,4 @@ $(foreach crate,$(RUSTCRATES),$(eval $(call RUST_CRATE_DEPEND,$(crate),$($(crate
 
 fclean_dirs:
 	rm -rf $(RUSTLIBDIR) $(RUSTBUILDDIR) doc
-.PHONY fclean:			fclean_dirs
+.PHONY fclean:          fclean_dirs
