@@ -138,7 +138,7 @@ endef
 
 ## Utils
 define RUST_CRATE_DEPEND
-$(1):                   $$($(2)_NAME)
+$$($(1)_NAMES):         $$($(2)_NAME)
 endef
 
 define CREATE_DIR
