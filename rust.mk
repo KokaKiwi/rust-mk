@@ -78,6 +78,7 @@ define RUST_CRATE_COMMON
 
 $(1)_DIRNAME            =   $$(RUSTSRCDIR)/$(1)
 $(1)_DEPFILE            =   $$(RUSTBUILDDIR)/$(1).deps.mk
+$(1)_DEPFILE_TEST       =   $$(RUSTBUILDDIR)/$(1).deps.test.mk
 $(1)_TESTNAME           =   $$(RUSTBUILDDIR)/test_$(1)
 
 ifeq ($$($(1)_TYPE),)
@@ -125,7 +126,8 @@ $$($(1)_NAME):          $$($(1)_BUILD_DEPS)
 -include $$($(1)_DEPFILE)
 
 $$($(1)_TESTNAME):      $$($(1)_BUILD_DEPS)
-	@$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --test -o $$($(1)_TESTNAME) $$($(1)_ROOT_TEST)
+	@$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --dep-info $$($(1)_DEPFILE_TEST) --test -o $$($(1)_TESTNAME) $$($(1)_ROOT_TEST)
+-include $$($(1)_DEPFILE_TEST)
 
 .PHONY all:             build_$(1)
 .PHONY clean:           clean_$(1)
