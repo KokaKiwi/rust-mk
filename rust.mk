@@ -121,6 +121,9 @@ install_$(1):           $$($(1)_NAME)
 	@mkdir -p $$($(1)_INSTALLDIR)
 	$(INSTALL) $$($(1)_NAMES) $$($(1)_INSTALLDIR)
 
+uninstall_$(1):
+	rm -f $$(foreach name,$$($(1)_NAMES),$$($(1)_INSTALLDIR)/$$(notdir $$(name)))
+
 $$($(1)_NAME):          $$($(1)_BUILD_DEPS)
 	$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS_BUILD) $$($(1)_RUSTCFLAGS) --dep-info $$($(1)_DEPFILE) $$($(1)_ROOT)
 -include $$($(1)_DEPFILE)
@@ -135,6 +138,7 @@ $$($(1)_TESTNAME):      $$($(1)_BUILD_DEPS)
 .PHONY bench:           bench_$(1)
 .PHONY doc:             doc_$(1)
 .PHONY install:         install_$(1)
+.PHONY uninstall:       uninstall_$(1)
 
 endef
 
@@ -167,6 +171,7 @@ test:
 bench:
 doc:
 install:
+uninstall:
 
 $(eval $(call CREATE_DIR,$(RUSTBUILDDIR)))
 $(eval $(call CREATE_DIR,$(RUSTLIBDIR)))
