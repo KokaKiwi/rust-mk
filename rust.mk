@@ -37,7 +37,7 @@ RUSTSRCDIR              ?=  src
 RUSTLIBDIR              ?=  lib
 RUSTINSTALLDIR          ?=  ~/.rust
 
-RUSTLIBFLAGS            =   -L $(RUSTLIBDIR)
+RUSTLIBFLAGS            =   -L $(RUSTLIBDIR) -L $(RUSTINSTALLDIR)/lib
 
 RUSTCFLAGS              +=  $(RUSTLIBFLAGS)
 RUSTDOCFLAGS            +=  $(RUSTLIBFLAGS)
