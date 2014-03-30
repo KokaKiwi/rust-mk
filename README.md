@@ -113,6 +113,12 @@ Default: `src`
 
 This directory is where crates must be find.
 
+### RUSTBINDIR ###
+
+Default: `.`
+
+This directory is where runnable crates' binaries will be stored.
+
 ### RUSTLIBDIR ###
 
 Default: `lib`

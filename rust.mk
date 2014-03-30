@@ -34,6 +34,7 @@ RUSTDEBUG               ?=  0
 RUSTAUTORULES           ?=  1
 RUSTBUILDDIR            ?=  .rust
 RUSTSRCDIR              ?=  src
+RUSTBINDIR              ?=  .
 RUSTLIBDIR              ?=  lib
 RUSTINSTALLDIR          ?=  ~/.rust
 
@@ -59,6 +60,8 @@ rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) \
 define RUST_CRATE_BIN
 
 $(1)_ROOT               =   $$($(1)_DIRNAME)/main.rs
+$(1)_PREFIX             =   $$(RUSTBINDIR)/
+$(1)_RUSTCFLAGS_BUILD   +=  --out-dir $$(RUSTBINDIR)
 $(1)_INSTALLDIR         =   $$(RUSTINSTALLDIR)/bin
 
 endef
@@ -180,6 +183,7 @@ install:
 uninstall:
 
 $(eval $(call CREATE_DIR,$(RUSTBUILDDIR)))
+$(eval $(call CREATE_DIR,$(RUSTBINDIR)))
 $(eval $(call CREATE_DIR,$(RUSTLIBDIR)))
 
 ifeq ($(RUSTAUTORULES),1)
@@ -189,5 +193,5 @@ endif
 fclean:                 clean
 
 fclean_dirs:
-	rm -rf $(RUSTLIBDIR) $(RUSTBUILDDIR) doc
+	rm -rf $(RUSTLIBDIR) $(RUSTBINDIR) $(RUSTBUILDDIR) doc
 .PHONY fclean:          fclean_dirs
