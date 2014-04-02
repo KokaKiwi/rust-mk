@@ -70,6 +70,7 @@ $(1)_ROOT               =   $$($(1)_DIRNAME)/lib.rs
 $(1)_PREFIX             =   $$(RUSTLIBDIR)/
 $(1)_RUSTCFLAGS_BUILD   +=  --out-dir $$(RUSTLIBDIR)
 $(1)_INSTALLDIR         =   $$(RUSTINSTALLDIR)/lib
+$(1)_INSTALLABLE        ?=  1
 
 endef
 
@@ -117,12 +118,14 @@ bench_$(1):             $$($(1)_TESTNAME)
 doc_$(1):
 	$$(RUSTDOC) $$(RUSTDOCFLAGS) $$($(1)_ROOT)
 
+ifeq ($$($(1)_INSTALLABLE),1)
 install_$(1):           $$($(1)_NAME)
 	@mkdir -p $$($(1)_INSTALLDIR)
 	$(INSTALL) $$($(1)_NAMES) $$($(1)_INSTALLDIR)
 
 uninstall_$(1):
 	rm -f $$(foreach name,$$($(1)_NAMES),$$($(1)_INSTALLDIR)/$$(notdir $$(name)))
+endif
 
 $$($(1)_NAME):          $$($(1)_BUILD_DEPS)
 	$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS_BUILD) $$($(1)_RUSTCFLAGS) --dep-info $$($(1)_DEPFILE) $$($(1)_ROOT)
@@ -137,8 +140,11 @@ $$($(1)_TESTNAME):      $$($(1)_BUILD_DEPS)
 .PHONY test:            test_$(1)
 .PHONY bench:           bench_$(1)
 .PHONY doc:             doc_$(1)
+
+ifeq ($$($(1)_INSTALLABLE),1)
 .PHONY install:         install_$(1)
 .PHONY uninstall:       uninstall_$(1)
+endif
 
 endef
 
