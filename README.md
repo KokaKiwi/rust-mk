@@ -48,19 +48,34 @@ $(eval $(call RUST_CRATE_RULES))
 Rules
 -----
 
-`make all` - Make all crates.
+```sh
+$ make help
+ Common rules:
+  make all                 - Build all crates (alias of 'build' target).
+  make build               - Build all crates.
+  make clean               - Clean crates targets.
+  make fclean              - Clean crates targets and build directories.
+  make rebuild             - Rebuild all crates.
+  make test                - Build and run tests.
+  make bench               - Build and run benchs.
+  make doc                 - Generate crates documentation.
+  make install             - Install crates targets in ~/.rust
+  make uninstall           - Uninstall crates targets.
+  make crates              - Print available crates.
+  make help                - Print this help.
 
-`make clean` - Clean all targets.
+ Crates rules:
+  make build_<crate>       - Build <crate>.
+  make clean_<crate>       - Clean <crate> targets.
+  make rebuild_<crate>     - Rebuild <crate>.
+  make test_<crate>        - Build and run <crate> tests.
+  make bench_<crate>       - Build and run <crate> benchs.
+  make doc_<crate>         - Generate <crate> documentation.
+  make install_<crate>     - Install <crate> targets in ~/.rust
+  make uninstall_<crate>   - Uninstall <crate> targets.
 
-`make fclean` - Clean all targets and delete build directories.
-
-`make test` - Compile and run tests.
-
-`make bench` - Compile and run bench.
-
-`make doc` - Generate doc for crates.
-
-`make install` - Install crates.
+ Available crates:         [...]
+```
 
 Special variables
 -----------------
