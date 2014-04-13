@@ -181,7 +181,7 @@ endef
 
 ## Utils
 define RUST_CRATE_DEPEND
-$$($(1)_NAMES):         $$($(2)_NAME)
+$$($(1)_NAMES):         $$(foreach dep,$(2),$$($$(dep)_NAME))
 endef
 
 define RUST_CLEAN_DIR
