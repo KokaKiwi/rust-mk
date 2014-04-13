@@ -67,7 +67,7 @@ define RUST_CRATE_BIN
 $(1)_ROOT               =   $$($(1)_DIRNAME)/main.rs
 $(1)_PREFIX             =   $$(RUSTBINDIR)/
 $(1)_RUSTCFLAGS_BUILD   +=  --out-dir $$(RUSTBINDIR)
-$(1)_INSTALLDIR         =   $$(RUSTINSTALLDIR)/bin
+$(1)_INSTALLDIR         =   bin
 
 endef
 
@@ -77,8 +77,7 @@ define RUST_CRATE_LIB
 $(1)_ROOT               =   $$($(1)_DIRNAME)/lib.rs
 $(1)_PREFIX             =   $$(RUSTLIBDIR)/
 $(1)_RUSTCFLAGS_BUILD   +=  --out-dir $$(RUSTLIBDIR)
-$(1)_INSTALLDIR         =   $$(RUSTINSTALLDIR)/lib
-$(1)_INSTALLABLE        ?=  1
+$(1)_INSTALLDIR         =   lib
 
 endef
 
@@ -90,6 +89,7 @@ $(1)_DIRNAME            =   $$(RUSTSRCDIR)/$(1)
 $(1)_DEPFILE            =   $$(RUSTBUILDDIR)/$(1).deps.mk
 $(1)_DEPFILE_TEST       =   $$(RUSTBUILDDIR)/$(1).deps.test.mk
 $(1)_TESTNAME           =   $$(RUSTBUILDDIR)/test_$(1)
+$(1)_INSTALLABLE        ?=  1
 
 ### Determine crate type based on existing files
 ifeq ($$($(1)_TYPE),)
@@ -139,12 +139,12 @@ doc_$(1):
 ifeq ($$($(1)_INSTALLABLE),1)
 ### Crate `install` rule
 install_$(1):           $$($(1)_NAME)
-	@mkdir -p $$($(1)_INSTALLDIR)
-	$(INSTALL) $$($(1)_NAMES) $$($(1)_INSTALLDIR)
+	@mkdir -p $$(RUSTINSTALLDIR)/$$($(1)_INSTALLDIR)
+	$(INSTALL) $$($(1)_NAMES) $$(RUSTINSTALLDIR)/$$($(1)_INSTALLDIR)
 
 ### Crate `uninstall` rule
 uninstall_$(1):
-	rm -f $$(foreach name,$$($(1)_NAMES),$$($(1)_INSTALLDIR)/$$(notdir $$(name)))
+	rm -f $$(foreach name,$$($(1)_NAMES),$$(RUSTINSTALLDIR)/$$($(1)_INSTALLDIR)/$$(notdir $$(name)))
 endif
 
 ### Crate build rule
