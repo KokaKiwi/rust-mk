@@ -125,6 +125,12 @@ Default: `lib`
 
 This directory is where library crates will be stored.
 
+### RUSTDOCDIR ###
+
+Default: `doc`
+
+This directory is where crate docs will be stored.
+
 ### RUSTINSTALLDIR ###
 
 Default: `~/.rust`

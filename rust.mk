@@ -36,12 +36,16 @@ RUSTBUILDDIR            ?=  .rust
 RUSTSRCDIR              ?=  src
 RUSTBINDIR              ?=  .
 RUSTLIBDIR              ?=  lib
+RUSTDOCDIR              ?=  doc
 RUSTINSTALLDIR          ?=  ~/.rust
 
 RUSTLIBFLAGS            =   -L $(RUSTLIBDIR) -L $(RUSTINSTALLDIR)/lib
 
 RUSTCFLAGS              +=  $(RUSTLIBFLAGS)
 RUSTDOCFLAGS            +=  $(RUSTLIBFLAGS)
+
+## Set custom doc directory.
+RUSTDOCFLAGS            +=  --output $(RUSTDOCDIR)
 
 ## Add additionnal debug/optimize flags
 ifeq ($(RUSTDEBUG),0)
@@ -217,3 +221,4 @@ fclean:                 clean
 $(eval $(call RUST_CLEAN_DIR,build_dir,$(RUSTBUILDDIR)))
 $(eval $(call RUST_CLEAN_DIR,bin_dir,$(RUSTBINDIR)))
 $(eval $(call RUST_CLEAN_DIR,lib_dir,$(RUSTLIBDIR)))
+$(eval $(call RUST_CLEAN_DIR,doc_dir,$(RUSTDOCDIR)))
