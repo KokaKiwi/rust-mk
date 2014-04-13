@@ -131,10 +131,14 @@ uninstall_$(1):
 endif
 
 $$($(1)_NAME):          $$($(1)_BUILD_DEPS)
+	@mkdir -p $$(dir $$($(1)_NAME))
+	@mkdir -p $$(dir $$($(1)_DEPFILE))
 	$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS_BUILD) $$($(1)_RUSTCFLAGS) --dep-info $$($(1)_DEPFILE) $$($(1)_ROOT)
 -include $$($(1)_DEPFILE)
 
 $$($(1)_TESTNAME):      $$($(1)_BUILD_DEPS)
+	@mkdir -p $$(dir $$($(1)_TESTNAME))
+	@mkdir -p $$(dir $$($(1)_DEPFILE_TEST))
 	@$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --dep-info $$($(1)_DEPFILE_TEST) --test -o $$($(1)_TESTNAME) $$($(1)_ROOT_TEST)
 -include $$($(1)_DEPFILE_TEST)
 
@@ -156,15 +160,6 @@ define RUST_CRATE_DEPEND
 $$($(1)_NAMES):         $$($(2)_NAME)
 endef
 
-define CREATE_DIR
-ifneq ($(1),.)
-$(1):
-	@mkdir -p $(1)
-
-all test bench install: $(1)
-endif
-endef
-
 ## Rules
 define RUST_CRATE_RULES
 
@@ -183,10 +178,6 @@ bench:
 doc:
 install:
 uninstall:
-
-$(eval $(call CREATE_DIR,$(RUSTBUILDDIR)))
-$(eval $(call CREATE_DIR,$(RUSTBINDIR)))
-$(eval $(call CREATE_DIR,$(RUSTLIBDIR)))
 
 ifeq ($(RUSTAUTORULES),1)
 $(eval $(call RUST_CRATE_RULES))
