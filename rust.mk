@@ -157,10 +157,12 @@ $$($(1)_NAMES):         $$($(2)_NAME)
 endef
 
 define CREATE_DIR
+ifneq ($(1),.)
 $(1):
 	@mkdir -p $(1)
 
 all test bench install: $(1)
+endif
 endef
 
 ## Rules
@@ -193,5 +195,15 @@ endif
 fclean:                 clean
 
 fclean_dirs:
-	rm -rf $(RUSTLIBDIR) $(RUSTBINDIR) $(RUSTBUILDDIR) doc
+ifneq ($(RUSTBUILDDIR),.)
+	rm -rf $(RUSTBUILDDIR)
+endif
+ifneq ($(RUSTBINDIR),.)
+	rm -rf $(RUSTBINDIR)
+endif
+ifneq ($(RUSTLIBDIR),.)
+	rm -rf $(RUSTLIBDIR)
+endif
+	rm -rf doc
+
 .PHONY fclean:          fclean_dirs
