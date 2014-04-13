@@ -71,71 +71,104 @@ These special variables can be set, either by setting them in env or by passing 
 make <varname>=<varvalue>
 ```
 
-### RUSTC ###
+### `RUSTC` ###
 
 Default: `rustc`
 
 Path to `rustc` executable.
 
-### RUSTDOC ###
+### `RUSTDOC` ###
 
 Default: `rustdoc`
 
 Path to `rustdoc` executable.
 
-### RUSTCFLAGS ###
+### `RUSTCFLAGS` ###
 
 Default: depending on others vars
 
 Flags used to compile crates.
 
-### RUSTDOCFLAGS ###
+### `RUSTDOCFLAGS` ###
 
 Default: nothing
 
 Flags used to generate docs.
 
-### RUSTDEBUG ###
+### `RUSTDEBUG` ###
 
 Default: `0`
 
 If set to `1`, activate debug flags (`-g`) else optimization flags will be activated (`--opt-level=3`)
 
-### RUSTBUILDDIR ###
+### `RUSTBUILDDIR` ###
 
 Default: `.rust`
 
 This directory will be used to store build files (like test binaries).
 
-### RUSTSRCDIR ###
+### `RUSTSRCDIR` ###
 
 Default: `src`
 
 This directory is where crates must be find.
 
-### RUSTBINDIR ###
+### `RUSTBINDIR` ###
 
 Default: `.`
 
 This directory is where runnable crates' binaries will be stored.
 
-### RUSTLIBDIR ###
+### `RUSTLIBDIR` ###
 
 Default: `lib`
 
 This directory is where library crates will be stored.
 
-### RUSTDOCDIR ###
+### `RUSTDOCDIR` ###
 
 Default: `doc`
 
 This directory is where crate docs will be stored.
 
-### RUSTINSTALLDIR ###
+### `RUSTINSTALLDIR` ###
 
 Default: `~/.rust`
 
 This directory is where all crates will be installed.
+
+Crate variables
+---------------
+
+### `<crate>_TYPE` ###
+
+Default: Determined with existing files (`main.rs` or `lib.rs`) in source. directory.
+
+Values: `bin` or `lib`
+
+Specify the crate type of `<crate>` (indicate if it cannot be automatically determined or if you want to force the value).
+
+### `<crate>_CRATE_DEPS` ###
+
+Default: nothing
+
+Indicate other crate names on which `<crate>` depends.
+
+These crates will be built before `<crate>`
+
+### `<crate>_BUILD_DEPS` ###
+
+Default: nothing
+
+Indicate raw make rule dependencies on which `<crate>` depends.
+
+These rules will be built before `<crate>`
+
+### `<crate>_RUSTCFLAGS` ###
+
+Default: nothing
+
+Add crate-specific flags at build-time.
 
 License
 -------
