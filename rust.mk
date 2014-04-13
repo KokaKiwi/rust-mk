@@ -43,13 +43,14 @@ RUSTLIBFLAGS            =   -L $(RUSTLIBDIR) -L $(RUSTINSTALLDIR)/lib
 RUSTCFLAGS              +=  $(RUSTLIBFLAGS)
 RUSTDOCFLAGS            +=  $(RUSTLIBFLAGS)
 
+## Add additionnal debug/optimize flags
 ifeq ($(RUSTDEBUG),0)
 RUSTCFLAGS              +=  --opt-level=3
 else
 RUSTCFLAGS              +=  -g
 endif
 
-## UTILS
+## UTILS ##
 # Recursive wildcard function
 # http://blog.jgc.org/2011/07/gnu-make-recursive-wildcard-function.html
 rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) \
@@ -80,11 +81,13 @@ endef
 ## Common
 define RUST_CRATE_COMMON
 
+### Crate common variables
 $(1)_DIRNAME            =   $$(RUSTSRCDIR)/$(1)
 $(1)_DEPFILE            =   $$(RUSTBUILDDIR)/$(1).deps.mk
 $(1)_DEPFILE_TEST       =   $$(RUSTBUILDDIR)/$(1).deps.test.mk
 $(1)_TESTNAME           =   $$(RUSTBUILDDIR)/test_$(1)
 
+### Determine crate type based on existing files
 ifeq ($$($(1)_TYPE),)
 ifneq ($$(wildcard $$($(1)_DIRNAME)/main.rs),)
 $(1)_TYPE               =   bin
@@ -93,6 +96,7 @@ $(1)_TYPE               =   lib
 endif
 endif
 
+### Set up crates type dependent variables
 ifeq ($$($(1)_TYPE),bin)
 $$(eval $$(call RUST_CRATE_BIN,$(1)))
 else ifeq ($$($(1)_TYPE),lib)
@@ -103,51 +107,64 @@ else
 $$(error Unknown crate type '$$($(1)_TYPE)' for '$(1)')
 endif
 
+### Crate common variables (after type resolving)
 $(1)_ROOT_TEST          =   $$($(1)_ROOT)
 $(1)_NAMES              =   $$(addprefix $$($(1)_PREFIX),$$(shell $$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --crate-file-name $$($(1)_ROOT)))
 $(1)_NAME               =   $$(firstword $$($(1)_NAMES))
 
+### Crate build entry rule
 build_$(1):             $$($(1)_NAME)
 
+### Crate `clean` rule
 clean_$(1):
 	rm -f $$($(1)_NAMES) $$($(1)_DEPFILE) $$($(1)_TESTNAME)
 
+### Crate `test` rule
 test_$(1):              $$($(1)_TESTNAME)
 	@$$($(1)_TESTNAME)
 
+### Crate `bench` rule
 bench_$(1):             $$($(1)_TESTNAME)
 	@$$($(1)_TESTNAME) --bench
 
+### Crate `doc` rule
 doc_$(1):
 	$$(RUSTDOC) $$(RUSTDOCFLAGS) $$($(1)_ROOT)
 
+### Add crate install/uninstall rules if crate is flagged as "installable"
 ifeq ($$($(1)_INSTALLABLE),1)
+### Crate `install` rule
 install_$(1):           $$($(1)_NAME)
 	@mkdir -p $$($(1)_INSTALLDIR)
 	$(INSTALL) $$($(1)_NAMES) $$($(1)_INSTALLDIR)
 
+### Crate `uninstall` rule
 uninstall_$(1):
 	rm -f $$(foreach name,$$($(1)_NAMES),$$($(1)_INSTALLDIR)/$$(notdir $$(name)))
 endif
 
+### Crate build rule
 $$($(1)_NAME):          $$($(1)_BUILD_DEPS)
 	@mkdir -p $$(dir $$($(1)_NAME))
 	@mkdir -p $$(dir $$($(1)_DEPFILE))
 	$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS_BUILD) $$($(1)_RUSTCFLAGS) --dep-info $$($(1)_DEPFILE) $$($(1)_ROOT)
 -include $$($(1)_DEPFILE)
 
+### Crate test build rule
 $$($(1)_TESTNAME):      $$($(1)_BUILD_DEPS)
 	@mkdir -p $$(dir $$($(1)_TESTNAME))
 	@mkdir -p $$(dir $$($(1)_DEPFILE_TEST))
 	@$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --dep-info $$($(1)_DEPFILE_TEST) --test -o $$($(1)_TESTNAME) $$($(1)_ROOT_TEST)
 -include $$($(1)_DEPFILE_TEST)
 
+### Add crate rules to global rules
 .PHONY all:             build_$(1)
 .PHONY clean:           clean_$(1)
 .PHONY test:            test_$(1)
 .PHONY bench:           bench_$(1)
 .PHONY doc:             doc_$(1)
 
+### Add `install` and `uninstall` crate rules to global rules
 ifeq ($$($(1)_INSTALLABLE),1)
 .PHONY install:         install_$(1)
 .PHONY uninstall:       uninstall_$(1)
@@ -160,6 +177,14 @@ define RUST_CRATE_DEPEND
 $$($(1)_NAMES):         $$($(2)_NAME)
 endef
 
+define RUST_CLEAN_DIR
+ifneq ($(2),.)
+fclean_$(1):
+	rm -rf $(2)
+.PHONY fclean:          fclean_$(1)
+endif
+endef
+
 ## Rules
 define RUST_CRATE_RULES
 
@@ -170,6 +195,7 @@ endef
 
 # Rules
 
+## Basic rules
 all:
 clean:
 fclean:
@@ -179,22 +205,15 @@ doc:
 install:
 uninstall:
 
+## Auto rules
 ifeq ($(RUSTAUTORULES),1)
 $(eval $(call RUST_CRATE_RULES))
 endif
 
+## Basic rule dependencies
 fclean:                 clean
 
-fclean_dirs:
-ifneq ($(RUSTBUILDDIR),.)
-	rm -rf $(RUSTBUILDDIR)
-endif
-ifneq ($(RUSTBINDIR),.)
-	rm -rf $(RUSTBINDIR)
-endif
-ifneq ($(RUSTLIBDIR),.)
-	rm -rf $(RUSTLIBDIR)
-endif
-	rm -rf doc
-
-.PHONY fclean:          fclean_dirs
+## Build directories clean rules
+$(eval $(call RUST_CLEAN_DIR,build_dir,$(RUSTBUILDDIR)))
+$(eval $(call RUST_CLEAN_DIR,bin_dir,$(RUSTBINDIR)))
+$(eval $(call RUST_CLEAN_DIR,lib_dir,$(RUSTLIBDIR)))
