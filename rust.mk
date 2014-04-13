@@ -123,6 +123,9 @@ build_$(1):             $$($(1)_NAME)
 clean_$(1):
 	rm -f $$($(1)_NAMES) $$($(1)_DEPFILE) $$($(1)_TESTNAME)
 
+### Crate `rebuild` rule
+rebuild_$(1):           clean_$(1) build_$(1)
+
 ### Crate `test` rule
 test_$(1):              $$($(1)_TESTNAME)
 	@$$($(1)_TESTNAME)
@@ -162,7 +165,7 @@ $$($(1)_TESTNAME):      $$($(1)_BUILD_DEPS)
 -include $$($(1)_DEPFILE_TEST)
 
 ### Add crate rules to global rules
-.PHONY all:             build_$(1)
+.PHONY build:           build_$(1)
 .PHONY clean:           clean_$(1)
 .PHONY test:            test_$(1)
 .PHONY bench:           bench_$(1)
@@ -201,8 +204,10 @@ endef
 
 ## Basic rules
 all:
+build:
 clean:
 fclean:
+rebuild:
 test:
 bench:
 doc:
@@ -215,10 +220,44 @@ $(eval $(call RUST_CRATE_RULES))
 endif
 
 ## Basic rule dependencies
+all:                    build
 fclean:                 clean
+rebuild:                clean build
 
-## Build directories clean rules
+## `fclean` rules
 $(eval $(call RUST_CLEAN_DIR,build_dir,$(RUSTBUILDDIR)))
 $(eval $(call RUST_CLEAN_DIR,bin_dir,$(RUSTBINDIR)))
 $(eval $(call RUST_CLEAN_DIR,lib_dir,$(RUSTLIBDIR)))
 $(eval $(call RUST_CLEAN_DIR,doc_dir,$(RUSTDOCDIR)))
+
+## `crates` rule
+crates:
+	@echo "$(RUSTCRATES)"
+
+## `help` rule
+help:
+	@echo " Common rules:"
+	@echo "  make all                 - Build all crates (alias of 'build' target)."
+	@echo "  make build               - Build all crates."
+	@echo "  make clean               - Clean crates targets."
+	@echo "  make fclean              - Clean crates targets and build directories."
+	@echo "  make rebuild             - Rebuild all crates."
+	@echo "  make test                - Build and run tests."
+	@echo "  make bench               - Build and run benchs."
+	@echo "  make doc                 - Generate crates documentation."
+	@echo "  make install             - Install crates targets in $(RUSTINSTALLDIR)"
+	@echo "  make uninstall           - Uninstall crates targets."
+	@echo "  make crates              - Print available crates."
+	@echo "  make help                - Print this help."
+	@echo
+	@echo " Crates rules:"
+	@echo "  make build_<crate>       - Build <crate>."
+	@echo "  make clean_<crate>       - Clean <crate> targets."
+	@echo "  make rebuild_<crate>     - Rebuild <crate>."
+	@echo "  make test_<crate>        - Build and run <crate> tests."
+	@echo "  make bench_<crate>       - Build and run <crate> benchs."
+	@echo "  make doc_<crate>         - Generate <crate> documentation."
+	@echo "  make install_<crate>     - Install <crate> targets in $(RUSTINSTALLDIR)"
+	@echo "  make uninstall_<crate>   - Uninstall <crate> targets."
+	@echo
+	@echo " Available crates:         $(RUSTCRATES)"
