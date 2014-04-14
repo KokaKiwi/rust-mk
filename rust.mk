@@ -167,6 +167,7 @@ $$($(1)_TESTNAME):      $$($(1)_BUILD_DEPS)
 ### Add crate rules to global rules
 .PHONY build:           build_$(1)
 .PHONY clean:           clean_$(1)
+.PHONY:                 rebuild_$(1)
 .PHONY test:            test_$(1)
 .PHONY bench:           bench_$(1)
 .PHONY doc:             doc_$(1)
