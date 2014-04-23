@@ -86,7 +86,7 @@ define RUST_CRATE_COMMON
 $(1)_ROOTDIR            ?=  .
 $(1)_DIRNAME            ?=  $$($(1)_ROOTDIR)/$$(RUSTSRCDIR)/$(1)
 $(1)_DEPFILE            =   $$(RUSTBUILDDIR)/$(1).deps.mk
-$(1)_DEPFILE_TEST       =   $$(RUSTBUILDDIR)/$(1).deps.test.mk
+$(1)_DEPFILE_TEST       =   $$(RUSTBUILDDIR)/$(1).test.deps.mk
 $(1)_TESTNAME           =   $$(RUSTBUILDDIR)/test_$(1)
 $(1)_INSTALLABLE        ?=  1
 
