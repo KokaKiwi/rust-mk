@@ -190,6 +190,12 @@ Default: Determined with existing file (`main.rs` or `lib.rs`) in crate dir.
 
 Specify the crate root file (entry file when compiling the crate).
 
+### `<crate>_ROOT_TEST` ###
+
+Default: Crate root file
+
+Specify the crate root file used for tests.
+
 ### `<crate>_TYPE` ###
 
 Default: Determined with crate root (`main.rs` or `lib.rs`).

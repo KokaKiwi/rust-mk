@@ -120,7 +120,7 @@ $$(error Unknown crate type '$$($(1)_TYPE)' for '$(1)')
 endif
 
 ### Crate common variables (after type resolving)
-$(1)_ROOT_TEST          =   $$($(1)_ROOT)
+$(1)_ROOT_TEST          ?=  $$($(1)_ROOT)
 $(1)_NAMES              =   $$(addprefix $$($(1)_PREFIX),$$(shell $$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --crate-file-name $$($(1)_ROOT)))
 $(1)_NAME               =   $$(firstword $$($(1)_NAMES))
 
