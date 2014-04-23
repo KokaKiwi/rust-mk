@@ -64,7 +64,6 @@ rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) \
 ## Binary
 define RUST_CRATE_BIN
 
-$(1)_ROOT               ?=  $$($(1)_DIRNAME)/main.rs
 $(1)_PREFIX             =   $$(RUSTBINDIR)/
 $(1)_RUSTCFLAGS_BUILD   +=  --out-dir $$(RUSTBINDIR)
 $(1)_INSTALLDIR         =   bin
@@ -74,7 +73,6 @@ endef
 ## Libray
 define RUST_CRATE_LIB
 
-$(1)_ROOT               ?=  $$($(1)_DIRNAME)/lib.rs
 $(1)_PREFIX             =   $$(RUSTLIBDIR)/
 $(1)_RUSTCFLAGS_BUILD   +=  --out-dir $$(RUSTLIBDIR)
 $(1)_INSTALLDIR         =   lib
@@ -85,17 +83,27 @@ endef
 define RUST_CRATE_COMMON
 
 ### Crate common variables
-$(1)_DIRNAME            =   $$(RUSTSRCDIR)/$(1)
+$(1)_ROOTDIR            ?=  .
+$(1)_DIRNAME            ?=  $$($(1)_ROOTDIR)/$$(RUSTSRCDIR)/$(1)
 $(1)_DEPFILE            =   $$(RUSTBUILDDIR)/$(1).deps.mk
 $(1)_DEPFILE_TEST       =   $$(RUSTBUILDDIR)/$(1).deps.test.mk
 $(1)_TESTNAME           =   $$(RUSTBUILDDIR)/test_$(1)
 $(1)_INSTALLABLE        ?=  1
 
-### Determine crate type based on existing files
-ifeq ($$($(1)_TYPE),)
+### Determine crate root based on existing files, if not already defined.
+ifeq ($$($(1)_ROOT),)
 ifneq ($$(wildcard $$($(1)_DIRNAME)/main.rs),)
-$(1)_TYPE               =   bin
+$(1)_ROOT               ?=  $$($(1)_DIRNAME)/main.rs
 else ifneq ($$(wildcard $$($(1)_DIRNAME)/lib.rs),)
+$(1)_ROOT               ?=  $$($(1)_DIRNAME)/lib.rs
+endif
+endif
+
+### Determine crate type based on crate root
+ifeq ($$($(1)_TYPE),)
+ifeq ($$(notdir $$($(1)_ROOT)),main.rs)
+$(1)_TYPE               =   bin
+else ifeq ($$(notdir $$($(1)_ROOT)),lib.rs)
 $(1)_TYPE               =   lib
 endif
 endif

@@ -45,6 +45,27 @@ include             rust-mk/rust.mk
 $(eval $(call RUST_CRATE_RULES))
 ```
 
+### Import external crates (using rust-mk) ###
+
+```make
+RUSTCRATES          =   extcrate
+
+extcrate_ROOTDIR    =   deps/extcrate
+
+include             rust-mk/rust.mk
+```
+
+### Import external crates (not using rust-mk) ###
+
+```make
+RUSTCRATES          =   extcrate
+
+extcrate_ROOT       =   deps/extcrate/src/lib.rs
+extcrate_TYPE       =   lib # Only if the crate root filename is not lib.rs or main.rs
+
+include             rust-mk/rust.mk
+```
+
 Rules
 -----
 
@@ -155,9 +176,23 @@ This directory is where all crates will be installed.
 Crate variables
 ---------------
 
+### `<crate>_ROOTDIR` ###
+
+Default: .
+
+Directory where rust-mk will search for source directory containing the crate (usually `src/<crate>`).
+
+Useful when compiling an external crate.
+
+### `<crate>_ROOT` ###
+
+Default: Determined with existing file (`main.rs` or `lib.rs`) in crate dir.
+
+Specify the crate root file (entry file when compiling the crate).
+
 ### `<crate>_TYPE` ###
 
-Default: Determined with existing files (`main.rs` or `lib.rs`) in source. directory.
+Default: Determined with crate root (`main.rs` or `lib.rs`).
 
 Values: `bin` or `lib`
 
