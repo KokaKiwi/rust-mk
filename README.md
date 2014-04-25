@@ -203,6 +203,12 @@ Default: `0`
 - `0` if you want to test `<crate>`
 - `1` if you don't want to test `<crate>`
 
+### `<crate>_DONT_BENCH` ###
+
+Default: Value of `<crate>_DONT_TEST` variable
+
+Same as `<crate>_DONT_TEST` variable, but for bench.
+
 ### `<crate>_TYPE` ###
 
 Default: Determined with crate root (`main.rs` or `lib.rs`).
