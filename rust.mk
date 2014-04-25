@@ -89,6 +89,7 @@ $(1)_DEPFILE            =   $$(RUSTBUILDDIR)/$(1).deps.mk
 $(1)_DEPFILE_TEST       =   $$(RUSTBUILDDIR)/$(1).test.deps.mk
 $(1)_TESTNAME           =   $$(RUSTBUILDDIR)/test_$(1)
 $(1)_INSTALLABLE        ?=  1
+$(1)_DONT_TEST          ?=  0
 
 ### Determine crate root based on existing files, if not already defined.
 ifeq ($$($(1)_ROOT),)
@@ -129,14 +130,20 @@ build_$(1):             $$($(1)_NAME)
 
 ### Crate `clean` rule
 clean_$(1):
-	rm -f $$($(1)_NAMES) $$($(1)_DEPFILE) $$($(1)_TESTNAME)
+	rm -f $$($(1)_NAMES) $$($(1)_DEPFILE)
 
 ### Crate `rebuild` rule
 rebuild_$(1):           clean_$(1) build_$(1)
 
+ifneq ($$($(1)_DONT_TEST),1)
 ### Crate `test` rule
 test_$(1):              $$($(1)_TESTNAME)
 	@$$($(1)_TESTNAME)
+
+clean_test_$(1):
+	rm -f $$($(1)_TESTNAME)
+.PHONY clean_$(1):      clean_test_$(1)
+endif
 
 ### Crate `bench` rule
 bench_$(1):             $$($(1)_TESTNAME)
@@ -166,17 +173,18 @@ $$($(1)_NAME):          $$($(1)_BUILD_DEPS)
 -include $$($(1)_DEPFILE)
 
 ### Crate test build rule
+ifneq ($$($(1)_DONT_TEST),1)
 $$($(1)_TESTNAME):      $$($(1)_BUILD_DEPS)
 	@mkdir -p $$(dir $$($(1)_TESTNAME))
 	@mkdir -p $$(dir $$($(1)_DEPFILE_TEST))
 	@$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --dep-info $$($(1)_DEPFILE_TEST) --test -o $$($(1)_TESTNAME) $$($(1)_ROOT_TEST)
 -include $$($(1)_DEPFILE_TEST)
+endif
 
 ### Add crate rules to global rules
 .PHONY build:           build_$(1)
 .PHONY clean:           clean_$(1)
 .PHONY:                 rebuild_$(1)
-.PHONY test:            test_$(1)
 .PHONY bench:           bench_$(1)
 .PHONY doc:             doc_$(1)
 
@@ -184,6 +192,11 @@ $$($(1)_TESTNAME):      $$($(1)_BUILD_DEPS)
 ifeq ($$($(1)_INSTALLABLE),1)
 .PHONY install:         install_$(1)
 .PHONY uninstall:       uninstall_$(1)
+endif
+
+### Add `test` crate rule to global rules
+ifneq ($$($(1)_DONT_TEST),1)
+.PHONY test:            test_$(1)
 endif
 
 endef

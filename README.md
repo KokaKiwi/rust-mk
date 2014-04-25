@@ -196,6 +196,13 @@ Default: Crate root file
 
 Specify the crate root file used for tests.
 
+### `<crate>_DONT_TEST` ###
+
+Default: `0`
+
+- `0` if you want to test `<crate>`
+- `1` if you don't want to test `<crate>`
+
 ### `<crate>_TYPE` ###
 
 Default: Determined with crate root (`main.rs` or `lib.rs`).
