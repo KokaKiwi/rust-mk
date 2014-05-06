@@ -91,6 +91,7 @@ $(1)_TESTNAME           =   $$(RUSTBUILDDIR)/test_$(1)
 $(1)_INSTALLABLE        ?=  1
 $(1)_DONT_TEST          ?=  0
 $(1)_DONT_BENCH         ?=  $$($(1)_DONT_TEST)
+$(1)_DONT_DOC           ?=  0
 
 ### Determine crate root based on existing files, if not already defined.
 ifeq ($$($(1)_ROOT),)
@@ -148,9 +149,11 @@ bench_$(1):             $$($(1)_TESTNAME)
 	@$$($(1)_TESTNAME) --bench
 endif
 
+ifneq ($$($(1)_DONT_DOC),1)
 ### Crate `doc` rule
 doc_$(1):
 	$$(RUSTDOC) $$(RUSTDOCFLAGS) $$($(1)_ROOT)
+endif
 
 ### Add crate install/uninstall rules if crate is flagged as "installable"
 ifeq ($$($(1)_INSTALLABLE),1)
@@ -196,12 +199,16 @@ endif
 .PHONY build:           build_$(1)
 .PHONY clean:           clean_$(1)
 .PHONY:                 rebuild_$(1)
-.PHONY doc:             doc_$(1)
 
 ### Add `install` and `uninstall` crate rules to global rules
 ifeq ($$($(1)_INSTALLABLE),1)
 .PHONY install:         install_$(1)
 .PHONY uninstall:       uninstall_$(1)
+endif
+
+### Add `doc` crate rules
+ifneq ($$($($(1)_DONT_DOC)),1)
+.PHONY doc:             doc_$(1)
 endif
 
 ### Add `test` crate rule to global rules

@@ -209,6 +209,13 @@ Default: Value of `<crate>_DONT_TEST` variable
 
 Same as `<crate>_DONT_TEST` variable, but for bench.
 
+### `<crate>_DONT_DOC` ###
+
+Default: `0`
+
+- `0` if you want to generate doc for `<crate>`
+- `1` if you don't want to generate doc for `<crate>`
+
 ### `<crate>_TYPE` ###
 
 Default: Determined with crate root (`main.rs` or `lib.rs`).
