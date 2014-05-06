@@ -89,9 +89,15 @@ $(1)_DEPFILE            =   $$(RUSTBUILDDIR)/$(1).deps.mk
 $(1)_DEPFILE_TEST       =   $$(RUSTBUILDDIR)/$(1).test.deps.mk
 $(1)_TESTNAME           =   $$(RUSTBUILDDIR)/test_$(1)
 $(1)_INSTALLABLE        ?=  1
+$(1)_TEST_DOC           ?=  1
 $(1)_DONT_TEST          ?=  0
 $(1)_DONT_BENCH         ?=  $$($(1)_DONT_TEST)
 $(1)_DONT_DOC           ?=  0
+
+### Set additionnal flags for rustdoc if `<crate>_TEST_DOC` is set
+ifeq ($$($(1)_TEST_DOC),1)
+$(1)_RUSTDOCFLAGS       +=  --test
+endif
 
 ### Determine crate root based on existing files, if not already defined.
 ifeq ($$($(1)_ROOT),)
@@ -152,7 +158,7 @@ endif
 ifneq ($$($(1)_DONT_DOC),1)
 ### Crate `doc` rule
 doc_$(1):
-	$$(RUSTDOC) $$(RUSTDOCFLAGS) $$($(1)_ROOT)
+	$$(RUSTDOC) $$(RUSTDOCFLAGS) $$($(1)_RUSTDOCFLAGS) $$($(1)_ROOT)
 endif
 
 ### Add crate install/uninstall rules if crate is flagged as "installable"

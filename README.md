@@ -196,6 +196,14 @@ Default: Crate root file
 
 Specify the crate root file used for tests.
 
+### `<crate>_TEST_DOC` ###
+
+Default: `1`
+
+Specify if you want to test the Rust code in your doc comments.
+
+In fact, it add `--test` to `rustdoc`
+
 ### `<crate>_DONT_TEST` ###
 
 Default: `0`
