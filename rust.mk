@@ -49,7 +49,7 @@ RUSTDOCFLAGS            +=  --output $(RUSTDOCDIR)
 
 ## Add additionnal debug/optimize flags
 ifeq ($(RUSTDEBUG),0)
-RUSTCFLAGS              +=  --opt-level=3
+RUSTCFLAGS              +=  --opt-level=3 --cfg ndebug
 else
 RUSTCFLAGS              +=  -g
 endif
