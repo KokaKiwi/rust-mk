@@ -94,11 +94,6 @@ $(1)_DONT_TEST          ?=  0
 $(1)_DONT_BENCH         ?=  $$($(1)_DONT_TEST)
 $(1)_DONT_DOC           ?=  0
 
-### Set additionnal flags for rustdoc if `<crate>_TEST_DOC` is set
-ifeq ($$($(1)_TEST_DOC),1)
-$(1)_RUSTDOCFLAGS       +=  --test
-endif
-
 ### Determine crate root based on existing files, if not already defined.
 ifeq ($$($(1)_ROOT),)
 ifneq ($$(wildcard $$($(1)_DIRNAME)/main.rs),)
@@ -158,6 +153,9 @@ endif
 ifneq ($$($(1)_DONT_DOC),1)
 ### Crate `doc` rule
 doc_$(1):
+ifeq ($$($(1)_TEST_DOC),1) # Test doc before generating it if enabled.
+	$$(RUSTDOC) $$(RUSTDOCFLAGS) $$($(1)_RUSTDOCFLAGS) --test $$($(1)_ROOT)
+endif
 	$$(RUSTDOC) $$(RUSTDOCFLAGS) $$($(1)_RUSTDOCFLAGS) $$($(1)_ROOT)
 endif
 
