@@ -152,6 +152,10 @@ endif
 
 ifneq ($$($(1)_DONT_DOC),1)
 ### Crate `doc` rule
+ifeq ($$($(1)_TEST_DOC),1)
+#### Need to build crate before testing doc
+doc_$(1):               $$($(1)_NAME)
+endif
 doc_$(1):
 ifeq ($$($(1)_TEST_DOC),1) # Test doc before generating it if enabled.
 	$$(RUSTDOC) $$(RUSTDOCFLAGS) $$($(1)_RUSTDOCFLAGS) --test $$($(1)_ROOT)
