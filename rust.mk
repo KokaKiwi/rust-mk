@@ -65,7 +65,6 @@ rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) \
 define RUST_CRATE_BIN
 
 $(1)_PREFIX             ?=  $$(RUSTBINDIR)/
-$(1)_RUSTCFLAGS_BUILD   +=  --out-dir $$(RUSTBINDIR)
 $(1)_INSTALLDIR         =   bin
 
 endef
@@ -74,7 +73,6 @@ endef
 define RUST_CRATE_LIB
 
 $(1)_PREFIX             ?=  $$(RUSTLIBDIR)/
-$(1)_RUSTCFLAGS_BUILD   +=  --out-dir $$(RUSTLIBDIR)
 $(1)_INSTALLDIR         =   lib
 
 endef
@@ -127,6 +125,7 @@ endif
 $(1)_ROOT_TEST          ?=  $$($(1)_ROOT)
 $(1)_NAMES              =   $$(addprefix $$($(1)_PREFIX),$$(shell $$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --crate-file-name $$($(1)_ROOT)))
 $(1)_NAME               =   $$(firstword $$($(1)_NAMES))
+$(1)_RUSTCFLAGS_BUILD   +=  --out-dir $$($(1)_PREFIX)
 
 ### Crate build entry rule
 build_$(1):             $$($(1)_NAME)
