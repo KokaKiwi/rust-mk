@@ -64,7 +64,7 @@ rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) \
 ## Binary
 define RUST_CRATE_BIN
 
-$(1)_PREFIX             =   $$(RUSTBINDIR)/
+$(1)_PREFIX             ?=  $$(RUSTBINDIR)/
 $(1)_RUSTCFLAGS_BUILD   +=  --out-dir $$(RUSTBINDIR)
 $(1)_INSTALLDIR         =   bin
 
@@ -73,7 +73,7 @@ endef
 ## Libray
 define RUST_CRATE_LIB
 
-$(1)_PREFIX             =   $$(RUSTLIBDIR)/
+$(1)_PREFIX             ?=  $$(RUSTLIBDIR)/
 $(1)_RUSTCFLAGS_BUILD   +=  --out-dir $$(RUSTLIBDIR)
 $(1)_INSTALLDIR         =   lib
 
