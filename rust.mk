@@ -232,7 +232,7 @@ endif
 ### Additionnals crate rules
 ifneq ($$($(1)_DONT_ADD_RULES),1)
 ifdef RUST_CRATE_RULES_ADD
-$$(eval $$(call RUST_CRATE_RULE_ADD,$(1)))
+$$(eval $$(call RUST_CRATE_RULES_ADD,$(1)))
 endif
 endif
 
