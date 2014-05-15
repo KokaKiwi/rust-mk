@@ -42,7 +42,7 @@ RUSTAUTORULES       =   0
 
 include             rust-mk/rust.mk
 
-$(eval $(call RUST_CRATE_RULES))
+$(eval $(call RUST_CRATES_RULES))
 ```
 
 ### Import external crates (using rust-mk) ###
@@ -173,6 +173,12 @@ Default: `~/.rust`
 
 This directory is where all crates will be installed.
 
+### `RUST_CRATE_RULES_ADD` ###
+
+Default: Not defined
+
+You can define this variable to add some rules for all crates.
+
 Crate variables
 ---------------
 
@@ -253,6 +259,13 @@ These rules will be built before `<crate>`
 Default: nothing
 
 Add crate-specific flags at build-time.
+
+### `<crate>_DONT_ADD_RULES` ###
+
+Default: `0`
+
+- `0` if you want to extends this crate with `RUST_CRATE_RULES_ADD` variable.
+- `0` if you don't want to extends this crate with `RUST_CRATE_RULES_ADD` variable.
 
 License
 -------

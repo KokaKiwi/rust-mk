@@ -78,7 +78,7 @@ $(1)_INSTALLDIR         =   lib
 endef
 
 ## Common
-define RUST_CRATE_COMMON
+define RUST_CRATE_RULES
 
 ### Crate common variables
 $(1)_ROOTDIR            ?=  .
@@ -91,6 +91,7 @@ $(1)_TEST_DOC           ?=  1
 $(1)_DONT_TEST          ?=  0
 $(1)_DONT_BENCH         ?=  $$($(1)_DONT_TEST)
 $(1)_DONT_DOC           ?=  0
+$(1)_DONT_ADD_RULES     ?=  1
 
 ### Determine crate root based on existing files, if not already defined.
 ifeq ($$($(1)_ROOT),)
@@ -228,6 +229,13 @@ ifneq ($$($(1)_DONT_BENCH),1)
 .PHONY bench:           bench_$(1)
 endif
 
+### Additionnals crate rules
+ifneq ($$($(1)_DONT_ADD_RULES),1)
+ifdef RUST_CRATE_RULES_ADD
+$$(eval $$(call RUST_CRATE_RULE_ADD,$(1)))
+endif
+endif
+
 endef
 
 ## Utils
@@ -244,9 +252,9 @@ endif
 endef
 
 ## Rules
-define RUST_CRATE_RULES
+define RUST_CRATES_RULES
 
-$$(foreach crate,$$(RUSTCRATES),$$(eval $$(call RUST_CRATE_COMMON,$$(crate))))
+$$(foreach crate,$$(RUSTCRATES),$$(eval $$(call RUST_CRATE_RULES,$$(crate))))
 $$(foreach crate,$$(RUSTCRATES),$$(eval $$(call RUST_CRATE_DEPEND,$$(crate),$$($$(crate)_CRATE_DEPS))))
 
 endef
@@ -267,7 +275,7 @@ uninstall:
 
 ## Auto rules
 ifeq ($(RUSTAUTORULES),1)
-$(eval $(call RUST_CRATE_RULES))
+$(eval $(call RUST_CRATES_RULES))
 endif
 
 ## Basic rule dependencies
