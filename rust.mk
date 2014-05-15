@@ -91,7 +91,7 @@ $(1)_TEST_DOC           ?=  1
 $(1)_DONT_TEST          ?=  0
 $(1)_DONT_BENCH         ?=  $$($(1)_DONT_TEST)
 $(1)_DONT_DOC           ?=  0
-$(1)_DONT_ADD_RULES     ?=  1
+$(1)_DONT_ADD_RULES     ?=  0
 
 ### Determine crate root based on existing files, if not already defined.
 ifeq ($$($(1)_ROOT),)
