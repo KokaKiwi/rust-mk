@@ -73,23 +73,23 @@ RUSTCRATES          =   mycrate
 
 # LLVM
 define RUST_CRATE_RULES_ADD
-$(1)_LLVM_NAME = $(1).ll
+$(1)_LLVM_NAME      = $(1).ll
 
-_llvm_$(1): $$($(1)_LLVM_NAME)
-.PHONY llvm: _llvm_$(1)
+_llvm_$(1):         $$($(1)_LLVM_NAME)
+.PHONY llvm:        _llvm_$(1)
 
 _clean_llvm_$(1):
     rm -f $$($(1)_LLVM_NAME)
-.PHONY clean: _clean_llvm_$(1)
+.PHONY clean:       _clean_llvm_$(1)
 
-$(1).ll: $$($(1)_NAME) $$($(1)_ROOT)
+$(1).ll:            $$($(1)_NAME) $$($(1)_ROOT)
     $$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS_BUILD) $$($(1)_RUSTCFLAGS) --emit ir -o $(1).ll $$($(1)_ROOT)
 endef
 
 include rust-mk/rust.mk
 
 llvm:
-.PHONY: llvm
+.PHONY:             llvm
 ```
 
 Rules
