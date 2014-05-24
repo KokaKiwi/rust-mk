@@ -12,6 +12,12 @@ Usage
 git submodule add git://github.com/KokaKiwi/rust-mk.git
 ```
 
+Or, if you don't work in a local Git repository:
+
+```sh
+git clone git://github.com/KokaKiwi/rust-mk.git
+```
+
 ### Basic usage ###
 
 This Makefile will compile a crate located in src/mycrate/{lib.rs,main.rs}
