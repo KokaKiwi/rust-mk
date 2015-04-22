@@ -124,7 +124,7 @@ endif
 
 ### Crate common variables (after type resolving)
 $(1)_ROOT_TEST          ?=  $$($(1)_ROOT)
-$(1)_NAMES              =   $$(addprefix $$($(1)_PREFIX),$$(shell $$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --print-file-name $$($(1)_ROOT)))
+$(1)_NAMES              =   $$(addprefix $$($(1)_PREFIX),$$(shell $$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --print file-names $$($(1)_ROOT)))
 $(1)_NAME               =   $$(firstword $$($(1)_NAMES))
 $(1)_RUSTCFLAGS_BUILD   +=  --out-dir $$($(1)_PREFIX)
 
@@ -179,7 +179,8 @@ endif
 $$($(1)_NAME):          $$($(1)_BUILD_DEPS)
 	@mkdir -p $$(dir $$($(1)_NAME))
 	@mkdir -p $$(dir $$($(1)_DEPFILE))
-	$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS_BUILD) $$($(1)_RUSTCFLAGS) --dep-info $$($(1)_DEPFILE) $$($(1)_ROOT)
+	$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS_BUILD) $$($(1)_RUSTCFLAGS) --emit dep-info -o $$($(1)_DEPFILE) $$($(1)_ROOT)
+	$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS_BUILD) $$($(1)_RUSTCFLAGS) $$($(1)_ROOT)
 -include $$($(1)_DEPFILE)
 
 ### Crate test build rule
@@ -195,7 +196,8 @@ ifeq ($$($(1)_COMPILE_TEST),1)
 $$($(1)_TESTNAME):      $$($(1)_BUILD_DEPS)
 	@mkdir -p $$(dir $$($(1)_TESTNAME))
 	@mkdir -p $$(dir $$($(1)_DEPFILE_TEST))
-	@$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --dep-info $$($(1)_DEPFILE_TEST) --test -o $$($(1)_TESTNAME) $$($(1)_ROOT_TEST)
+	@$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --emit dep-info -o $$($(1)_DEPFILE_TEST) --test $$($(1)_ROOT_TEST)
+	@$$(RUSTC) $$(RUSTCFLAGS) $$($(1)_RUSTCFLAGS) --test -o $$($(1)_TESTNAME) $$($(1)_ROOT_TEST)
 -include $$($(1)_DEPFILE_TEST)
 
 clean_test_$(1):
